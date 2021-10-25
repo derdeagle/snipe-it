@@ -91,6 +91,7 @@ class Accessory extends SnipeModel
         'supplier_id',
         'image',
         'qty',
+        'min_amt',
         'requestable'
     ];
 
@@ -376,5 +377,18 @@ class Accessory extends SnipeModel
     public function scopeOrderManufacturer($query, $order)
     {
         return $query->leftJoin('manufacturers', 'accessories.manufacturer_id', '=', 'manufacturers.id')->orderBy('manufacturers.name', $order);
+    }
+
+    /**
+    * Query builder scope to order on supplier
+    *
+    * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+    * @param  text                              $order       Order
+    *
+    * @return \Illuminate\Database\Query\Builder          Modified query builder
+    */
+    public function scopeOrderSupplier($query, $order)
+    {
+        return $query->leftJoin('suppliers', 'accessories.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
     }
 }
