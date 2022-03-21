@@ -3,6 +3,7 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Models\Asset;
+use App\Models\Setting;
 use Gate;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -20,6 +21,9 @@ class AssetsTransformer
 
     public function transformAsset(Asset $asset)
     {
+        // This uses the getSettings() method so we're pulling from the cache versus querying the settings on single asset
+        $setting = Setting::getSettings();
+
         $array = [
             'id' => (int) $asset->id,
             'name' => e($asset->name),
@@ -64,6 +68,8 @@ class AssetsTransformer
                 'name'=> e($asset->defaultLoc->name)
             ]  : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
+            'qr' => ($setting->qr_code=='1') ? config('app.url').'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png' : null,
+            'alt_barcode' => ($setting->alt_barcode_enabled=='1') ? config('app.url').'/uploads/barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png' : null,
             'assigned_to' => $this->transformAssignedTo($asset),
             'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months . ' ' . trans('admin/hardware/form.months')) : null,
             'warranty_expires' => ($asset->warranty_months > 0) ?  Helper::getFormattedDateObject($asset->warranty_expires, 'date') : null,
@@ -93,15 +99,15 @@ class AssetsTransformer
                     $value = (Gate::allows('superadmin')) ? $decrypted : strtoupper(trans('admin/custom_fields/general.encrypted'));
 
                     $fields_array[$field->name] = [
-                            'field' => $field->convertUnicodeDbSlug(),
-                            'value' => $value,
+                            'field' => e($field->convertUnicodeDbSlug()),
+                            'value' => e($value),
                             'field_format' => $field->format,
                         ];
 
                 } else {
                     $fields_array[$field->name] = [
-                        'field' => $field->convertUnicodeDbSlug(),
-                        'value' => $asset->{$field->convertUnicodeDbSlug()},
+                        'field' => e($field->convertUnicodeDbSlug()),
+                        'value' => e($asset->{$field->convertUnicodeDbSlug()}),
                         'field_format' => $field->format,
                     ];
 
@@ -114,24 +120,13 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Asset::class),
-            'checkin' => Gate::allows('checkin', Asset::class),
-            'clone' => false,
-            'restore' => false,
-            'update' => (bool) Gate::allows('update', Asset::class),
-            'delete' => ($asset->assigned_to=='' && Gate::allows('delete', Asset::class)),
+            'checkout'      => ($asset->deleted_at=='' && Gate::allows('checkout', Asset::class)) ? true : false,
+            'checkin'       => ($asset->deleted_at=='' && Gate::allows('checkin', Asset::class)) ? true : false,
+            'clone'         => Gate::allows('create', Asset::class) ? true : false,
+            'restore'       => ($asset->deleted_at!='' && Gate::allows('create', Asset::class)) ? true : false,
+            'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class)) ? true : false,
         ];
-
-        if ($asset->deleted_at!='') {
-            $permissions_array['available_actions'] = [
-                'checkout' => true,
-                'checkin' => false,
-                'clone' => Gate::allows('create', Asset::class),
-                'restore' => Gate::allows('create', Asset::class),
-                'update' => false,
-                'delete' => false,
-            ];
-        }
 
 
 
@@ -145,7 +140,7 @@ class AssetsTransformer
                         
                             'id' => $component->id,
                             'pivot_id' => $component->pivot->id,
-                            'name' => $component->name,
+                            'name' => e($component->name),
                             'qty' => $component->pivot->assigned_qty,
                             'price_cost' => $component->purchase_cost,
                             'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
@@ -181,7 +176,7 @@ class AssetsTransformer
         }
         return $asset->assigned ? [
             'id' => $asset->assigned->id,
-            'name' => $asset->assigned->display_name,
+            'name' => e($asset->assigned->display_name),
             'type' => $asset->assignedType()
         ] : null;
     }
