@@ -1,6 +1,6 @@
 <?php
-namespace App\Providers;
 
+namespace App\Providers;
 
 use App\Models\Accessory;
 use App\Models\Asset;
@@ -8,15 +8,16 @@ use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\License;
 use App\Models\Setting;
+use App\Models\SnipeSCIMConfig;
 use App\Observers\AccessoryObserver;
 use App\Observers\AssetObserver;
 use App\Observers\ComponentObserver;
 use App\Observers\ConsumableObserver;
 use App\Observers\LicenseObserver;
 use App\Observers\SettingObserver;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\UrlGenerator;
 
 /**
  * This service provider handles setting the observers on models
@@ -24,7 +25,6 @@ use Illuminate\Routing\UrlGenerator;
  * PHP version 5.5.9
  * @version    v3.0
  */
-
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -54,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        \Illuminate\Pagination\Paginator::useBootstrap();
+
         Schema::defaultStringLength(191);
         Asset::observe(AssetObserver::class);
         Accessory::observe(AccessoryObserver::class);
@@ -70,10 +72,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
-        if (($this->app->environment('production'))  && (config('logging.channels.rollbar.access_token'))) {
+        // Only load rollbar if there is a rollbar key and the app is in production
+        if (($this->app->environment('production')) && (config('logging.channels.rollbar.access_token'))) {
             $this->app->register(\Rollbar\Laravel\RollbarServiceProvider::class);
-        }
+        } 
 
+        // Only load dusk's service provider if the app is in local or develop mode
+        if ($this->app->environment(['local', 'develop'])) {
+            $this->app->register(\Laravel\Dusk\DuskServiceProvider::class);
+        } 
+
+        $this->app->singleton('ArieTimmerman\Laravel\SCIMServer\SCIMConfig', SnipeSCIMConfig::class); // this overrides the default SCIM configuration with our own
+    
     }
 }

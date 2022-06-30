@@ -1,6 +1,6 @@
 <?php
 
-    return [
+return [
     'accessories'			=> 'Tartozékok',
     'activated'			    => 'Aktivált',
     'accessory'				=> 'Tartozék',
@@ -26,6 +26,7 @@
     'audit'				    => 'Könyvvizsgálat',
     'audit_report'			=> 'Audit napló',
     'assets'				=> 'Eszközök',
+    'assigned_to'           => 'Hozzárendelve a következőhöz: :name',
     'avatar_delete'         => 'Avatar törlése',
     'avatar_upload'         => 'Avatar frissítése',
     'back'      			=> 'Vissza',
@@ -114,6 +115,7 @@
     'files'                 => 'Fájlok',
     'file_name'				=> 'Fájl',
     'file_type'             => 'Fájl típus',
+    'filesize'              => 'File Size',
     'file_uploads'			=> 'Fájlfeltöltések',
     'file_upload'           => 'Fájl feltöltése',
     'generate'				=> 'Létrehoz',
@@ -193,8 +195,8 @@
     'qty'		            => 'Mennyiség',
     'quantity'		        => 'Mennyiség',
     'quantity_minimum'      => ':count eszközöd van a megadott minimum mennyiség közelében vagy az alatt',
-    'quickscan_checkin'  	=> 'Quick Scan Checkin',
-    'quickscan_checkin_status'  	=> 'Checkin Status',
+    'quickscan_checkin'  	=> 'Gyors szkennelős visszavétel',
+    'quickscan_checkin_status'  	=> 'Visszavétel státusza',
     'ready_to_deploy'		=> 'Kiadásra kész',
     'recent_activity'		=> 'Legutóbbi tevékenységek',
     'remaining'             => 'Hátralévő',
@@ -229,6 +231,7 @@
     'show_current'  		=> 'Aktuális megjelenítése',
     'sign_in'				=> 'Bejelentkezés',
     'signature'             => 'Aláírás',
+    'signed_off_by'         => 'Aláírta',
     'skin'       			=> 'Kinézet',
     'slack_msg_note'        => 'A slack üzenet el lesz küldve',
     'slack_test_msg'        => 'Oh szia! Úgy látszik a te Slack integrálásod a Snipe-IT el sikeres volt!',
@@ -237,6 +240,7 @@
     'state'  				=> 'Megye',
     'status_labels'			=> 'Státusz címkék',
     'status'    			=> 'Állapot',
+    'accept_eula'           => 'Elfogadási megállapodás',
     'supplier'              => 'Támogató',
     'suppliers'  			=> 'Beszállítók',
     'sure_to_delete'    => 'Biztosan törölni kíván',
@@ -350,4 +354,7 @@
     'checkout_tooltip' => 'Adja ki ezt a cikket',
     'checkin_tooltip' => 'Vegye vissza ezt a cikket',
     'checkout_user_tooltip' => 'Adja ki ezt a cikket egy felhasználónak',
+    'maintenance_mode'      => 'The service is temporarily unavailable for system updates. Please check back later.',
+    'maintenance_mode_title' => 'System Temporarily Unavailable',
+    'ldap_import'           => 'User password should not be managed by LDAP. (This allows you to send forgotten password requests.)',
 ];

@@ -1,6 +1,6 @@
 <?php
 
-    return [
+return [
     'accessories'			=> 'Aksesuarlar',
     'activated'			    => 'Aktif edildi',
     'accessory'				=> 'Aksesuar',
@@ -26,6 +26,7 @@
     'audit'				    => 'Denetim',
     'audit_report'			=> 'Denetim Günlüğü',
     'assets'				=> 'Demirbaşlar',
+    'assigned_to'           => 'Bana Atanmış',
     'avatar_delete'         => 'Profil Resmini Sil',
     'avatar_upload'         => 'Profil Resmi Yükle',
     'back'      			=> 'Geri',
@@ -117,6 +118,7 @@ Context | Request Context
     'files'                 => 'Dosyalar',
     'file_name'				=> 'Dosya',
     'file_type'             => 'Dosya Türü',
+    'filesize'              => 'File Size',
     'file_uploads'			=> 'Dosya Yüklemeleri',
     'file_upload'           => 'Dosya Yükleme',
     'generate'				=> 'Oluştur',
@@ -232,6 +234,7 @@ Context | Request Context
     'show_current'  		=> 'Mevcutu Göster',
     'sign_in'				=> 'Oturum Aç',
     'signature'             => 'İmza',
+    'signed_off_by'         => 'Signed Off By',
     'skin'       			=> 'Tema',
     'slack_msg_note'        => 'Bir slack mesajı gönderilecek',
     'slack_test_msg'        => 'Oo merhaba! Görünüşe göre Snipe-IT ile Slack entegrasyonunuz çalışıyor!',
@@ -240,6 +243,7 @@ Context | Request Context
     'state'  				=> 'İlçe',
     'status_labels'			=> 'Durum Etiketleri',
     'status'    			=> 'Durum',
+    'accept_eula'           => 'Acceptance Agreement',
     'supplier'              => 'Tedarikçi',
     'suppliers'  			=> 'Tedarikçiler',
     'sure_to_delete'    => 'Silmek istediğinize emin misiniz',
@@ -353,4 +357,7 @@ Context | Request Context
     'checkout_tooltip' => 'Öğenin çıkışını yapın',
     'checkin_tooltip' => 'Öğenin girişini yapın',
     'checkout_user_tooltip' => 'Öğenin kullanıcıya çıkışını yapın',
+    'maintenance_mode'      => 'The service is temporarily unavailable for system updates. Please check back later.',
+    'maintenance_mode_title' => 'System Temporarily Unavailable',
+    'ldap_import'           => 'User password should not be managed by LDAP. (This allows you to send forgotten password requests.)',
 ];
