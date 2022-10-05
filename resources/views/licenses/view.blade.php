@@ -7,21 +7,6 @@
 @parent
 @stop
 
-{{-- Right header --}}
-@section('header_right')
-<div class="btn-group pull-right">
-  @can('update', $license)
-    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
-        <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu">
-        <li role="menuitem"><a href="{{ route('licenses.edit', ['license' => $license->id]) }}">{{ trans('admin/licenses/general.edit') }}</a></li>
-        <li role="menuitem"><a href="{{ route('clone/license', $license->id) }}">{{ trans('admin/licenses/general.clone') }}</a></li>
-    </ul>
-   @endcan
-</div>
-@stop
-
 {{-- Page content --}}
 @section('content')
 <div class="row">
@@ -51,7 +36,8 @@
 
             </a>
         </li>
-        
+
+        @can('licenses.files', $license)
         <li>
           <a href="#files" data-toggle="tab">
             <span class="hidden-lg hidden-md">
@@ -61,6 +47,7 @@
             </span>
           </a>
         </li>
+        @endcan
 
         <li>
           <a href="#history" data-toggle="tab">
@@ -78,8 +65,8 @@
               <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="{{ route('licenses.edit', $user->id) }}">{{ trans('admin/users/general.edit') }}</a></li>
-              <li><a href="{{ route('clone/license', $user->id) }}">{{ trans('admin/users/general.clone') }}</a></li>
+              <li><a href="{{ route('licenses.edit', $license->id) }}">{{ trans('admin/licenses/general.edit') }}</a></li>
+              <li><a href="{{ route('clone/license', $license->id) }}">{{ trans('admin/licenses/general.clone') }}</a></li>
             </ul>
           </li>
         @endcan
@@ -431,7 +418,7 @@
           </div> <!--/.row-->
         </div> <!-- /.tab-pane -->
 
-        @can('files', $license)
+        @can('licenses.files', $license)
         <div class="tab-pane" id="files">
           <div class="table-responsive">
             <table
@@ -484,8 +471,8 @@
                 <td>
                   {{ $file->filename }}
                 </td>
-                <td data-value="{{ filesize(storage_path('private_uploads/licenses/').$file->filename) }}">
-                  {{ Helper::formatFilesizeUnits(filesize(storage_path('private_uploads/licenses/').$file->filename)) }}
+                <td data-value="{{ Storage::size('private_uploads/licenses/'.$file->filename) }}">
+                  {{ Helper::formatFilesizeUnits(Storage::size('private_uploads/licenses/'.$file->filename)) }}
                 </td>
 
                 <td>
@@ -503,7 +490,7 @@
                 </td>
                 <td>{{ $file->created_at }}</td>
                 <td>
-                  <a class="btn delete-asset btn-danger btn-sm" href="{{ route('delete/licensefile', [$license->id, $file->id]) }}" data-content="{{ trans('general.delete_confirm', array('item' => $file)) }}" data-title="{{ trans('general.delete') }} {{ $file->filename }}?">
+                  <a class="btn delete-asset btn-danger btn-sm" href="{{ route('delete/licensefile', [$license->id, $file->id]) }}" data-content="{{ trans('general.delete_confirm', ['item' => $file->filename]) }}" data-title="{{ trans('general.delete') }}">
                     <i class="fas fa-trash icon-white" aria-hidden="true"></i>
                     <span class="sr-only">{{ trans('general.delete') }}</span>
                   </a>
@@ -576,4 +563,3 @@
 @section('moar_scripts')
   @include ('partials.bootstrap-table')
 @stop
-

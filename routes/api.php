@@ -86,7 +86,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             ]
         )->name('api.accessories.checkedout');
 
-        Route::get('{accessory}/checkout',
+        Route::post('{accessory}/checkout',
             [
                 Api\AccessoriesController::class, 
                 'checkout'
@@ -94,7 +94,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         )->name('api.accessories.checkout');
 
 
-        Route::get('{accessory}/checkin',
+        Route::post('{accessory}/checkin',
             [
                 Api\AccessoriesController::class, 
                 'checkin'
@@ -236,7 +236,20 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ]
         )->name('api.components.assets');
 
-      }); 
+      });
+    Route::post('components/{id}/checkin',
+        [
+            Api\ComponentsController::class,
+            'checkin'
+        ]
+    )->name('api.components.checkin');
+
+    Route::post('components/{id}/checkout',
+        [
+            Api\ComponentsController::class,
+            'checkout'
+        ]
+    )->name('api.components.checkout');
 
 
       Route::resource('components', 
@@ -267,14 +280,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             ]
         )->name('api.consumables.selectlist');
 
-        Route::get('view/{id}/users',
+        Route::get('{id}/users',
             [
                 Api\ConsumablesController::class, 
                 'getDataView'
             ]
         )->name('api.consumables.showUsers');
 
-        Route::get('{consumable}/checkout',
+
+        // This is LEGACY endpoint URL and should be removed in the next major release
+        Route::get('view/{id}/users',
+              [
+                  Api\ConsumablesController::class,
+                  'getDataView'
+              ]
+        )->name('api.consumables.showUsers');
+
+        Route::post('{consumable}/checkout',
             [
                 Api\ConsumablesController::class, 
                 'checkout'
@@ -837,14 +859,21 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 ]
             )->name('api.statuslabels.selectlist');
 
-            Route::get('assets',
+            Route::get('assets/name',
                 [
                     Api\StatuslabelsController::class, 
                     'getAssetCountByStatuslabel'
                 ]
+            )->name('api.statuslabels.assets.byname');
+
+            Route::get('assets/type',
+                [
+                    Api\StatuslabelsController::class,
+                    'getAssetCountByMetaStatus'
+                ]
             )->name('api.statuslabels.assets.bytype');
 
-            Route::get('assetlist',
+            Route::get('{id}/assetlist',
                 [
                     Api\StatuslabelsController::class, 
                     'assets'

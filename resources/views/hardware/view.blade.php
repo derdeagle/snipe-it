@@ -22,7 +22,7 @@
                     @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
                         @can('checkin', \App\Models\Asset::class)
                             <li role="menuitem">
-                                <a href="{{ route('checkin/hardware', $asset->id) }}">
+                                <a href="{{ route('hardware.checkin.create', $asset->id) }}">
                                     {{ trans('admin/hardware/general.checkin') }}
                                 </a>
                             </li>
@@ -30,7 +30,7 @@
                     @elseif (($asset->assigned_to == '') && ($asset->deleted_at==''))
                         @can('checkout', \App\Models\Asset::class)
                             <li role="menuitem">
-                                <a href="{{ route('checkout/hardware', $asset->id)  }}">
+                                <a href="{{ route('hardware.checkout.create', $asset->id)  }}">
                                     {{ trans('admin/hardware/general.checkout') }}
                                 </a>
                             </li>
@@ -180,7 +180,7 @@
                     <li>
                     <a href="#modelfiles" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
-                            <i class="far fa-file fa-2x" aria-hidden="true"></i>
+                              <i class="fa-solid fa-laptop-file fa-2x" aria-hidden="true"></i>
                           </span>
                         <span class="hidden-xs hidden-sm">
                             {{ trans('general.additional_files') }}
@@ -472,9 +472,13 @@
                                                         @elseif (($field->format=='DATE') && ($asset->{$field->db_column_name()}!=''))
                                                             {{ \App\Helpers\Helper::getFormattedDateObject($asset->{$field->db_column_name()}, 'date', false) }}
                                                         @else
-                                                            {!! nl2br(e($asset->{$field->db_column_name()})) !!} &nbsp;
+                                                            {!! nl2br(e($asset->{$field->db_column_name()})) !!}
                                                         @endif
 
+                                                    @endif
+
+                                                    @if ($asset->{$field->db_column_name()}=='')
+                                                        &nbsp;
                                                     @endif
                                                 </div>
                                             </div>
@@ -515,7 +519,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    @if (($asset->model) && ($asset->depreciation))
+                                    @if (($asset->model) && ($asset->depreciation) && ($asset->purchase_date))
                                         <div class="row">
                                             <div class="col-md-2">
                                                 <strong>
@@ -570,7 +574,7 @@
 
 
                                     @if ($asset->warranty_months)
-                                        <div class="row{!! $asset->present()->warrantee_expires() < date("Y-m-d") ? ' warning' : '' !!}">
+                                        <div class="row">
                                             <div class="col-md-2">
                                                 <strong>
                                                     {{ trans('admin/hardware/form.warranty') }}
@@ -580,10 +584,35 @@
                                                 {{ $asset->warranty_months }}
                                                 {{ trans('admin/hardware/form.months') }}
 
-                                                ({{ trans('admin/hardware/form.expires') }}
-                                                {{ $asset->present()->warrantee_expires() }})
+                                                @if (($asset->serial && $asset->model->manufacturer) && $asset->model->manufacturer->name == 'Apple')
+                                                    <a href="https://checkcoverage.apple.com/us/{{ \App\Models\Setting::getSettings()->locale  }}/?sn={{ $asset->serial }}" target="_blank">
+                                                        <i class="fa-brands fa-apple" aria-hidden="true"><span class="sr-only">Applecare Statys Lookup</span></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
+
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <strong>
+                                                        {{ trans('admin/hardware/form.warranty_expires') }}
+                                                        @if ($asset->purchase_date)
+                                                        {!! $asset->present()->warranty_expires() < date("Y-m-d") ? '<i class="fas fa-exclamation-triangle text-orange" aria-hidden="true"></i>' : '' !!}
+                                                        @endif
+
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @if ($asset->purchase_date)
+                                                    {{ Helper::getFormattedDateObject($asset->present()->warranty_expires(), 'date', false) }}
+                                                    -
+                                                    {{ Carbon::parse($asset->present()->warranty_expires())->diffForHumans() }}
+                                                    @else
+                                                        {{ trans('general.na_no_purchase_date') }}
+                                                    @endif
+                                                </div>
+                                            </div>
+
                                     @endif
 
                                     @if (($asset->model) && ($asset->depreciation))
@@ -596,8 +625,7 @@
                                             <div class="col-md-6">
                                                 {{ $asset->depreciation->name }}
                                                 ({{ $asset->depreciation->months }}
-                                                {{ trans('admin/hardware/form.months') }}
-                                                )
+                                                {{ trans('admin/hardware/form.months') }})
                                             </div>
                                         </div>
                                         <div class="row">
@@ -607,13 +635,14 @@
                                                 </strong>
                                             </div>
                                             <div class="col-md-6">
-                                                @if ($asset->time_until_depreciated()->y > 0)
-                                                    {{ $asset->time_until_depreciated()->y }}
-                                                    {{ trans('admin/hardware/form.years') }},
+                                                @if ($asset->purchase_date)
+                                                {{ Helper::getFormattedDateObject($asset->depreciated_date()->format('Y-m-d'), 'date', false) }}
+                                                -
+                                                {{ Carbon::parse($asset->depreciated_date())->diffForHumans() }}
+                                                @else
+                                                    {{ trans('general.na_no_purchase_date') }}
                                                 @endif
-                                                {{ $asset->time_until_depreciated()->m }}
-                                                {{ trans('admin/hardware/form.months') }}
-                                                ({{ $asset->depreciated_date()->format('Y-m-d') }})
+
                                             </div>
                                         </div>
                                     @endif
@@ -639,21 +668,13 @@
                                                 </strong>
                                             </div>
                                             <div class="col-md-6">
+                                                @if ($asset->purchase_date)
                                                 {{ Helper::getFormattedDateObject($asset->present()->eol_date(), 'date', false) }}
-
-
-                                                @if ($asset->present()->months_until_eol())
-                                                    -
-                                                    @if ($asset->present()->months_until_eol()->y > 0)
-                                                        {{ $asset->present()->months_until_eol()->y }}
-                                                        {{ trans('general.years') }},
-                                                    @endif
-
-                                                    {{ $asset->present()->months_until_eol()->m }}
-                                                    {{ trans('general.months') }}
-
+                                                -
+                                                {{ Carbon::parse($asset->present()->eol_date())->diffForHumans() }}
+                                                @else
+                                                    {{ trans('general.na_no_purchase_date') }}
                                                 @endif
-
                                             </div>
                                         </div>
                                     @endif
@@ -1177,10 +1198,14 @@
                                                     @endif
                                                 </td>
                                                 <td>
+                                                    @if (Storage::exists('private_uploads/assets/'.$file->filename))
                                                     {{ $file->filename }}
+                                                    @else
+                                                    <del>{{ $file->filename }}</del>
+                                                    @endif
                                                 </td>
-                                                <td data-value="{{ filesize(storage_path('private_uploads/assets/').$file->filename) }}">
-                                                    {{ Helper::formatFilesizeUnits(filesize(storage_path('private_uploads/assets/').$file->filename)) }}
+                                                <td data-value="{{ (Storage::exists('private_uploads/assets/'.$file->filename) ? Storage::size('private_uploads/assets/'.$file->filename) : '') }}">
+                                                    {{ @Helper::formatFilesizeUnits(Storage::exists('private_uploads/assets/'.$file->filename) ? Storage::size('private_uploads/assets/'.$file->filename) : '') }}
                                                 </td>
                                                 <td>
                                                     @if ($file->note)
@@ -1188,7 +1213,7 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($file->filename)
+                                                    @if (($file->filename) && (Storage::exists('private_uploads/assets/'.$file->filename)))
                                                         <a href="{{ route('show/assetfile', [$asset->id, $file->id]) }}" class="btn btn-default">
                                                             <i class="fas fa-download" aria-hidden="true"></i>
                                                         </a>
@@ -1270,10 +1295,14 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    {{ $file->filename }}
+                                                    @if (Storage::exists('private_uploads/assetmodels/'.$file->filename))
+                                                        {{ $file->filename }}
+                                                    @else
+                                                        <del>{{ $file->filename }}</del>
+                                                    @endif
                                                 </td>
-                                                <td data-value="{{ filesize(storage_path('private_uploads/assetmodels/').$file->filename) }}">
-                                                    {{ Helper::formatFilesizeUnits(filesize(storage_path('private_uploads/assetmodels/').$file->filename)) }}
+                                                <td data-value="{{ (Storage::exists('private_uploads/assetmodels/'.$file->filename) ? Storage::size('private_uploads/assetmodels/'.$file->filename) : '') }}">
+                                                    {{ Helper::formatFilesizeUnits(@Storage::size('private_uploads/assetmodels/'.$file->filename)) }}
                                                 </td>
                                                 <td>
                                                     @if ($file->note)
@@ -1281,7 +1310,7 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($file->filename)
+                                                    @if (($file->filename) && (Storage::exists('private_uploads/assetmodels/'.$file->filename)))
                                                         <a href="{{ route('show/modelfile', [$asset->model->id, $file->id]) }}" class="btn btn-default">
                                                             <i class="fas fa-download" aria-hidden="true"></i>
                                                         </a>

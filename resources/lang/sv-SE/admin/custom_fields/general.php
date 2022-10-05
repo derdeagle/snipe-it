@@ -41,7 +41,7 @@ return [
     'make_required' => 'Valfritt - klicka för att begära',
     'reorder' => 'Ändra ordning',
     'db_field' => 'DB Fält',
-    'db_convert_warning' => 'VARNING. Detta fält finns i tabellen för anpassade fält som <code> :db_column </code> men bör vara :expected </code>.',
+    'db_convert_warning' => 'VARNING. Detta fält finns i tabellen för anpassade fält som <code>:db_column</code> men borde vara <code>:expected</code>.',
     'is_unique' => 'Detta värde måste vara unikt för alla tillgångar',
     'unique' => 'Unik',
 ];

@@ -113,7 +113,7 @@
             </a>
             <ul class="dropdown-menu">
               <li><a href="{{ route('users.edit', $user->id) }}">{{ trans('admin/users/general.edit') }}</a></li>
-              <li><a href="{{ route('clone/user', $user->id) }}">{{ trans('admin/users/general.clone') }}</a></li>
+              <li><a href="{{ route('users.clone.show', $user->id) }}">{{ trans('admin/users/general.clone') }}</a></li>
               @if ((Auth::user()->id !== $user->id) && (!config('app.lock_passwords')) && ($user->deleted_at==''))
                 <li><a href="{{ route('users.destroy', $user->id) }}">{{ trans('button.delete') }}</a></li>
               @endif
@@ -141,11 +141,6 @@
                 <div class="callout callout-warning">
                   <i class="icon fas fa-exclamation-triangle"></i>
                   {{ trans('admin/users/message.user_deleted_warning') }}
-                  @can('update', $user)
-                      <a href="{{ route('restore/user', $user->id) }}">
-                        {{ trans('admin/users/general.restore_user') }}
-                      </a>
-                  @endcan
                 </div>
               </div>
             @endif
@@ -158,7 +153,7 @@
               <div class="col-md-12 text-center">
                 
                  @if (($user->isSuperUser()) || ($user->hasAccess('admin')))
-                    <i class="fas fa-crown fa-2x {{  ($user->isSuperUser()) ? 'text-danger' : ' text-orange'}}"></i>
+                    <i class="fas fa-crown fa-2x{{  ($user->isSuperUser()) ? ' text-danger' : ' text-orange'}}"></i>
                     <div class="{{  ($user->isSuperUser()) ? 'text-danger' : ' text-orange'}}" style="font-weight: bold">{{  ($user->isSuperUser()) ? 'superadmin' : 'admin'}}</div>
                   @endif
 
@@ -178,7 +173,7 @@
 
               @can('create', $user)
                 <div class="col-md-12" style="padding-top: 5px;">
-                  <a href="{{ route('clone/user', $user->id) }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">{{ trans('admin/users/general.clone') }}</a>
+                  <a href="{{ route('users.clone.show', $user->id) }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">{{ trans('admin/users/general.clone') }}</a>
                 </div>
                @endcan
 
@@ -186,6 +181,19 @@
                 <div class="col-md-12" style="padding-top: 5px;">
                   <a href="{{ route('users.print', $user->id) }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print" target="_blank" rel="noopener">{{ trans('admin/users/general.print_assigned') }}</a>
                 </div>
+                @endcan
+
+                @can('view', $user)
+                  <div class="col-md-12" style="padding-top: 5px;">
+                  @if(!empty($user->email))
+                    <form action="{{ route('users.email',['userId'=> $user->id]) }}" method="POST">
+                      {{ csrf_field() }}
+                      <button style="width: 100%;" class="btn btn-sm btn-primary hidden-print" rel="noopener">{{ trans('admin/users/general.email_assigned') }}</button>
+                    </form>
+                  @else
+                      <button style="width: 100%;" class="btn btn-sm btn-primary hidden-print" rel="noopener" disabled title="{{ trans('admin/users/message.user_has_no_email') }}">{{ trans('admin/users/general.email_assigned') }}</button>
+                  @endif
+                  </div>
                 @endcan
 
                 @can('update', $user)
@@ -220,7 +228,10 @@
                     </div>
                   @else
                     <div class="col-md-12" style="padding-top: 5px;">
-                      <a href="{{ route('restore/user', $user->id) }}" style="width: 100%;" class="btn btn-sm btn-warning hidden-print">{{ trans('button.restore') }}</a>
+                        <form method="POST" action="{{ route('users.restore.store', $user->id) }}">
+                            @csrf
+                            <button style="width: 100%;" class="btn btn-sm btn-warning hidden-print">{{ trans('button.restore') }}</button>
+                        </form>
                     </div>
                   @endif
                 @endcan
@@ -271,13 +282,9 @@
                       <div class="col-md-9">
 
                         @if ($user->isSuperUser())
-                          <label class="label label-danger">
-                              <i class="fas fa-crown" title="superuser"></i>
-                          </label>&nbsp;
+                          <label class="label label-danger"><i class="fas fa-crown" title="superuser"></i></label>&nbsp;
                         @elseif ($user->hasAccess('admin'))
-                          <label class="label label-warning">
-                              <i class="fas fa-crown" title="admin"></i>
-                          </label>&nbsp;
+                          <label class="label label-warning"><i class="fas fa-crown" title="admin"></i></label>&nbsp;
                         @endif
                          {{ $user->username }}
 
@@ -723,7 +730,7 @@
                     </td>
                     <td class="hidden-print">
                       @can('checkin', $accessory)
-                        <a href="{{ route('checkin/accessory', array('accessoryID'=> $accessory->pivot->id, 'backto'=>'user')) }}" class="btn btn-primary btn-sm hidden-print">{{ trans('general.checkin') }}</a>
+                        <a href="{{ route('accessories.checkin.show', array('accessoryID'=> $accessory->pivot->id, 'backto'=>'user')) }}" class="btn btn-primary btn-sm hidden-print">{{ trans('general.checkin') }}</a>
                       @endcan
                     </td>
                   </tr>
@@ -756,9 +763,10 @@
                     }'>
               <thead>
                 <tr>
-                  <th class="col-md-6">{{ trans('general.name') }}</th>
+                  <th class="col-md-3">{{ trans('general.name') }}</th>
                   <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                  <th class="col-md-4">{{ trans('general.date') }}</th>
+                  <th class="col-md-2">{{ trans('general.date') }}</th>
+                    <th class="col-md-5">{{ trans('general.notes') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -768,7 +776,8 @@
                   <td>
                     {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}
                   </td>
-                  <td>{{ $consumable->pivot->created_at }}</td>                      
+                  <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>
+                  <td>{{ $consumable->pivot->note }}</td>
                 </tr>
                 @endforeach
               </tbody>
@@ -833,7 +842,7 @@
                                 {{ $file->filename }}
                             </td>
                             <td>
-                                {{ Helper::formatFilesizeUnits(filesize(storage_path('private_uploads/users/').$file->filename)) }}
+                                {{ Helper::formatFilesizeUnits(Storage::size('private_uploads/users/'.$file->filename)) }}
                             </td>
 
                             <td>
@@ -899,6 +908,9 @@
                 <th class="col-sm-3" data-field="created_at" data-formatter="dateDisplayFormatter" data-sortable="true">{{ trans('general.date') }}</th>
                 <th class="col-sm-2" data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.admin') }}</th>
                 <th class="col-sm-2" data-field="action_type">{{ trans('general.action') }}</th>
+                  @if  ($snipeSettings->require_accept_signature=='1')
+                      <th class="col-md-3" data-field="signature_file" data-visible="false"  data-formatter="imageFormatter">{{ trans('general.signature') }}</th>
+                  @endif
                 <th class="col-sm-3" data-field="item" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
                 <th class="col-sm-2" data-field="target" data-formatter="polymorphicItemFormatter">{{ trans('general.target') }}</th>
               </tr>

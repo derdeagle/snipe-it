@@ -279,6 +279,23 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ->name('account.accept.item');
 
     Route::post('accept/{id}', [Account\AcceptanceController::class, 'store']);
+
+    Route::get(
+        'print',
+        [
+            ProfileController::class,
+            'printInventory'
+        ]
+    )->name('profile.print');
+
+    Route::post(
+        'email',
+        [
+            ProfileController::class,
+            'emailAssetList'
+        ]
+    )->name('profile.email_assets');
+
 });
 
 Route::group(['middleware' => ['auth']], function () {
@@ -467,12 +484,12 @@ Route::group(['middleware' => 'web'], function () {
     Route::get(
         'logout',
         [LoginController::class, 'logout']
-    )->name('logout');
+    )->name('logout.get');
 
     Route::post(
         'logout',
         [LoginController::class, 'logout']
-    )->name('logout');
+    )->name('logout.post');
 });
 
 //Auth::routes();

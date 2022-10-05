@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use App\Http\Requests\AssetCheckoutRequest;
 
 class BulkAssetsController extends Controller
 {
@@ -38,10 +39,6 @@ class BulkAssetsController extends Controller
         // Figure out where we need to send the user after the update is complete, and store that in the session
         $bulk_back_url = request()->headers->get('referer');
         session(['bulk_back_url' => $bulk_back_url]);
-
-        \Log::debug('Back to url: '.$bulk_back_url);
-
-
 
         $asset_ids = array_values(array_unique($request->input('ids')));
 
@@ -106,6 +103,8 @@ class BulkAssetsController extends Controller
             || ($request->filled('company_id'))
             || ($request->filled('status_id'))
             || ($request->filled('model_id'))
+            || ($request->filled('null_purchase_date'))
+            || ($request->filled('null_expected_checkin_date'))
         ) {
             foreach ($assets as $assetId) {
 
@@ -119,6 +118,14 @@ class BulkAssetsController extends Controller
                     ->conditionallyAddItem('status_id')
                     ->conditionallyAddItem('supplier_id')
                     ->conditionallyAddItem('warranty_months');
+
+                if ($request->input('null_purchase_date')=='1') {
+                    $this->update_array['purchase_date'] = null;
+                }
+
+                if ($request->input('null_expected_checkin_date')=='1') {
+                    $this->update_array['expected_checkin'] = null;
+                }
 
                 if ($request->filled('purchase_cost')) {
                     $this->update_array['purchase_cost'] =  Helper::ParseCurrency($request->input('purchase_cost'));
@@ -243,7 +250,7 @@ class BulkAssetsController extends Controller
      * Process Multiple Checkout Request
      * @return View
      */
-    public function storeCheckout(Request $request)
+    public function storeCheckout(AssetCheckoutRequest $request)
     {
 
         $this->authorize('checkout', Asset::class);
@@ -254,7 +261,7 @@ class BulkAssetsController extends Controller
             $target = $this->determineCheckoutTarget();
 
             if (! is_array($request->get('selected_assets'))) {
-                return redirect()->route('hardware/bulkcheckout')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
+                return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
 
             $asset_ids = array_filter($request->get('selected_assets'));
@@ -301,9 +308,9 @@ class BulkAssetsController extends Controller
                 return redirect()->to('hardware')->with('success', trans('admin/hardware/message.checkout.success'));
             }
             // Redirect to the asset management page with error
-            return redirect()->to('hardware/bulk-checkout')->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($errors);
+            return redirect()->route('hardware.bulkcheckout.show')->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($errors);
         } catch (ModelNotFoundException $e) {
-            return redirect()->to('hardware/bulk-checkout')->with('error', $e->getErrors());
+            return redirect()->route('hardware.bulkcheckout.show')->with('error', $e->getErrors());
         }
     }
 }

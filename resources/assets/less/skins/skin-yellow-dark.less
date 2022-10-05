@@ -78,6 +78,12 @@
   }
 }
 
+/**
+The dropdown is white, so use a darker color
+ */
+li.dropdown-item-marker {
+  color: var(--button-primary);
+}
 
 a {
   &:link {
@@ -114,6 +120,10 @@ a {
   --hover-link: lighten(#F0E68C, 45%); /* Use same as Header picker, lighten by 70% */
   --nav-link: #222; /* Use same as Header picker */
   --light-link: #545454; /* Use same as Header picker */
+}
+
+#ldapad_test_results.well.well-sm{
+  color: var(--back-main);
 }
 
 .main-header .navbar, .main-header .logo {

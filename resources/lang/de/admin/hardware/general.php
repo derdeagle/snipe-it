@@ -2,7 +2,7 @@
 
 return [
     'about_assets_title'           => 'Über Assets',
-    'about_assets_text'            => 'Assets sind Gegenstände die durch eine Seriennummer oder Bezeichnung identifiziert werden. Meistens sind diese von höherem Wert, wobei es Sinn macht diese spezifisch zu kennzeichnen.',
+    'about_assets_text'            => 'Assets sind Gegenstände die durch eine Seriennummer oder einem Asset-Tag identifiziert werden. Meistens sind diese Gegenstände von höherem Wert, weshalb es Sinn ergibt diese spezifisch zu kennzeichnen.',
     'archived'  				=> 'Archiviert',
     'asset'  					=> 'Asset',
     'bulk_checkout'             => 'Assets herausgeben',

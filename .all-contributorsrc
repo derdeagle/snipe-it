@@ -2637,6 +2637,107 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "naveensrinivasan",
+      "name": "Naveen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/172697?v=4",
+      "profile": "https://naveensrinivasan.dev",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mikeroq",
+      "name": "Mike Roquemore",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55674383?v=4",
+      "profile": "https://github.com/mikeroq",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "reederda",
+      "name": "Daniel Reeder",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7991086?v=4",
+      "profile": "https://github.com/reederda",
+      "contributions": [
+        "translation",
+        "translation",
+        "code"
+      ]
+    },
+    {
+      "login": "vickyjaura183",
+      "name": "vickyjaura183",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109422491?v=4",
+      "profile": "https://github.com/vickyjaura183",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "julian-piehl",
+      "name": "Peace",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32363424?v=4",
+      "profile": "https://github.com/julian-piehl",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kylegordon",
+      "name": "Kyle Gordon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/231528?v=4",
+      "profile": "https://github.com/kylegordon",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sunflowerbofh",
+      "name": "Katharina Drexel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53009155?v=4",
+      "profile": "http://www.bfh.ch",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dsferruzza",
+      "name": "David Sferruzza",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1931963?v=4",
+      "profile": "https://david.sferruzza.fr/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rnelsonee",
+      "name": "Rick Nelson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19511639?v=4",
+      "profile": "https://github.com/rnelsonee",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "BasO12",
+      "name": "BasO12",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94169344?v=4",
+      "profile": "https://github.com/BasO12",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Vautia",
+      "name": "Vautia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/111710123?v=4",
+      "profile": "https://github.com/Vautia",
+      "contributions": [
+        "security"
+      ]
     }
   ]
 }

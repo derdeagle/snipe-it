@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\View;
 use Input;
 use League\Csv\Reader;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use League\Csv\EscapeFormula;
+
 
 /**
  * This controller handles all actions related to Reports for
@@ -411,6 +413,7 @@ class ReportsController extends Controller
         $customfields = CustomField::get();
         $response = new StreamedResponse(function () use ($customfields, $request) {
             \Log::debug('Starting streamed response');
+            \Log::debug('CSV escaping is set to: '.config('app.escape_formulas'));
 
             // Open output stream
             $handle = fopen('php://output', 'w');
@@ -422,6 +425,9 @@ class ReportsController extends Controller
 
             $header = [];
 
+            if ($request->filled('id')) {
+                $header[] = trans('general.id');
+            }
 
             if ($request->filled('company')) {
                 $header[] = trans('general.company');
@@ -552,6 +558,10 @@ class ReportsController extends Controller
                 $header[] = trans('general.updated_at');
             }
 
+            if ($request->filled('deleted_at')) {
+                $header[] = trans('general.deleted');
+            }
+
             if ($request->filled('last_audit_date')) {
                 $header[] = trans('general.last_audit');
             }
@@ -562,6 +572,10 @@ class ReportsController extends Controller
 
             if ($request->filled('notes')) {
                 $header[] = trans('general.notes');
+            }
+
+            if ($request->filled('url')) {
+                $header[] = trans('admin/manufacturers/table.url');
             }
 
 
@@ -578,7 +592,7 @@ class ReportsController extends Controller
             \Log::debug('Added headers: '.$executionTime);
 
             $assets = \App\Models\Company::scopeCompanyables(Asset::select('assets.*'))->with(
-                'location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
+                'location', 'assetstatus', 'company', 'defaultLoc', 'assignedTo',
                 'model.category', 'model.manufacturer', 'supplier');
             
             if ($request->filled('by_location_id')) {
@@ -586,7 +600,6 @@ class ReportsController extends Controller
             }
 
             if ($request->filled('by_rtd_location_id')) {
-                \Log::debug('RTD location should match: '.$request->input('by_rtd_location_id'));
                 $assets->where('assets.rtd_location_id', $request->input('by_rtd_location_id'));
             }
 
@@ -607,7 +620,6 @@ class ReportsController extends Controller
             }
 
             if ($request->filled('by_dept_id')) {
-                \Log::debug('Only users in dept '.$request->input('by_dept_id'));
                 $assets->CheckedOutToTargetInDepartment($request->input('by_dept_id'));
             }
 
@@ -642,15 +654,32 @@ class ReportsController extends Controller
             if (($request->filled('next_audit_start')) && ($request->filled('next_audit_end'))) {
                 $assets->whereBetween('assets.next_audit_date', [$request->input('next_audit_start'), $request->input('next_audit_end')]);
             }
+            if ($request->filled('exclude_archived')) {
+                $assets->notArchived();
+            }
+            if ($request->input('deleted_assets') == '1') {
+                $assets->withTrashed();
+            }
+            if ($request->input('deleted_assets') == '0') {
+                $assets->onlyTrashed();
+            }
+
             $assets->orderBy('assets.id', 'ASC')->chunk(20, function ($assets) use ($handle, $customfields, $request) {
             
                 $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
                 \Log::debug('Walking results: '.$executionTime);
                 $count = 0;
+
+                $formatter = new EscapeFormula("`");
+
                 foreach ($assets as $asset) {
                     $count++;
                     $row = [];
-                    
+
+                    if ($request->filled('id')) {
+                        $row[] = ($asset->id) ? $asset->id : '';
+                    }
+
                     if ($request->filled('company')) {
                         $row[] = ($asset->company) ? $asset->company->name : '';
                     }
@@ -779,7 +808,7 @@ class ReportsController extends Controller
 
                     if ($request->filled('warranty')) {
                         $row[] = ($asset->warranty_months) ? $asset->warranty_months : '';
-                        $row[] = $asset->present()->warrantee_expires();
+                        $row[] = $asset->present()->warranty_expires();
                     }
 
                     if ($request->filled('depreciation')) {
@@ -806,6 +835,10 @@ class ReportsController extends Controller
                         $row[] = ($asset->updated_at) ? $asset->updated_at : '';
                     }
 
+                    if ($request->filled('deleted_at')) {
+                        $row[] = ($asset->deleted_at) ? $asset->deleted_at : '';
+                    }
+
                     if ($request->filled('last_audit_date')) {
                         $row[] = ($asset->last_audit_date) ? $asset->last_audit_date : '';
                     }
@@ -818,13 +851,27 @@ class ReportsController extends Controller
                         $row[] = ($asset->notes) ? $asset->notes : '';
                     }
 
+                    if ($request->filled('url')) {
+                        $row[] = config('app.url').'/hardware/'.$asset->id ;
+                    }
+
                     foreach ($customfields as $customfield) {
                         $column_name = $customfield->db_column_name();
                         if ($request->filled($customfield->db_column_name())) {
                             $row[] = $asset->$column_name;
                         }
                     }
-                    fputcsv($handle, $row);
+
+                    
+                    // CSV_ESCAPE_FORMULAS is set to false in the .env
+                    if (config('app.escape_formulas') === false) {
+                        fputcsv($handle, $row);
+
+                   // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
+                    } else {
+                        fputcsv($handle, $formatter->escapeRecord($row));
+                    }
+
                     $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
                     \Log::debug('-- Record '.$count.' Asset ID:'.$asset->id.' in '.$executionTime);
                 }
@@ -975,7 +1022,11 @@ class ReportsController extends Controller
         }
         $assetItem = $acceptance->checkoutable;
 
-        $logItem = $assetItem->checkouts()->where('created_at', '=', $acceptance->created_at)->get()[0];
+        if (is_null($acceptance->created_at)){
+            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+        } else {
+            $logItem = $assetItem->checkouts()->where('created_at', '=', $acceptance->created_at)->get()[0];
+        }
 
         if(!$assetItem->assignedTo->locale){
             Notification::locale(Setting::getSettings()->locale)->send(
@@ -1032,9 +1083,9 @@ class ReportsController extends Controller
          * Get all assets with pending checkout acceptances
          */
         if($showDeleted) {
-            $acceptances = CheckoutAcceptance::pending()->withTrashed()->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
+            $acceptances = CheckoutAcceptance::pending()->where('checkoutable_type', 'App\Models\Asset')->withTrashed()->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
         } else {
-            $acceptances = CheckoutAcceptance::pending()->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
+            $acceptances = CheckoutAcceptance::pending()->where('checkoutable_type', 'App\Models\Asset')->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
         }
 
         $assetsForReport = $acceptances
