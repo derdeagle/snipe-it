@@ -86,6 +86,15 @@ class UserPresenter extends Presenter
                 'formatter' => 'usersLinkFormatter',
             ],
             [
+                'field' => 'vip',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/users/general.vip_label'),
+                'visible' => false,
+                'formatter' => 'trueFalseFormatter',
+            ],
+            [
                 'field' => 'remote',
                 'searchable' => false,
                 'sortable' => true,
@@ -268,9 +277,9 @@ class UserPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ],
             [
-                'field' => 'two_factor_activated',
+                'field' => 'two_factor_optin',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/users/general.two_factor_active'),
                 'visible' => false,
@@ -303,6 +312,24 @@ class UserPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ],
             [
+                'field' => 'start_date',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.start_date'),
+                'visible' => false,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'end_date',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.end_date'),
+                'visible' => false,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
                 'field' => 'last_login',
                 'searchable' => false,
                 'sortable' => true,
@@ -328,8 +355,7 @@ class UserPresenter extends Presenter
     public function emailLink()
     {
         if ($this->email) {
-            return '<a href="mailto:'.$this->email.'">'.$this->email.'</a>'
-                .'<a href="mailto:'.$this->email.'" class="hidden-xs hidden-sm"><i class="far fa-envelope"></i></a>';
+            return '<a href="mailto:'.$this->email.'">'.$this->email.'</a><a href="mailto:'.$this->email.'" class="hidden-xs hidden-sm"><i class="far fa-envelope"></i></a>';
         }
 
         return '';

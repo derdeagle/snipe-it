@@ -43,12 +43,14 @@ return [
     'file'                 => 'L\'attribut: doit être un fichier.',
     'filled'               => 'Le champ d\'attribut: doit avoir une valeur.',
     'image'                => 'L\'attribut ":attribute" doit être une image.',
+    'import_field_empty'    => 'The value for :fieldname cannot be null.',
     'in'                   => 'Le :attribute selectionné est invalide.',
     'in_array'             => 'Le champ d\'attribut: n\'existe pas dans autre.',
     'integer'              => 'L\'attribut ":attribute" doit être un nombre entier.',
     'ip'                   => 'L\'attribut ":attribute" doit être une adresse IP valide.',
     'ipv4'                 => 'L\'attribut: doit être une adresse IPv4 valide.',
     'ipv6'                 => 'L\'attribut: doit être une adresse IPv6 valide.',
+    'is_unique_department' => 'The :attribute must be unique to this Company Location',
     'json'                 => 'L\'attribut: doit être une chaîne JSON valide.',
     'max'                  => [
         'numeric' => 'L\'attribut ":attribute" ne peut pas être plus grand que :max.',
@@ -91,26 +93,15 @@ return [
     'url'                  => 'Le format de cet-te :attribute est invalide.',
     'unique_undeleted'     => ':attribute doit être unique.',
     'non_circular'         => 'Le champ :attribute ne doit pas créer de référence circulaire.',
-    'disallow_same_pwd_as_user_fields' => 'Password cannot be the same as the username.',
-    'letters'              => 'Password must contain at least one letter.',
-    'numbers'              => 'Password must contain at least one number.',
-    'case_diff'            => 'Password must use mixed case.',
-    'symbols'              => 'Password must contain symbols.',
+    'disallow_same_pwd_as_user_fields' => 'Le mot de passe ne peut être le nom d\'utilisateur.',
+    'letters'              => 'Le mot de passe doit contenir au moins une lettre.',
+    'numbers'              => 'Le mot de passe doit contenir au moins un chiffre.',
+    'case_diff'            => 'Le mot de passe doit contenir au moins une minuscule et une majuscule.',
+    'symbols'              => 'Le mot de passe doit contenir au moins un caractère spécial.',
     'gte'                  => [
         'numeric'          => 'La valeur ne peut pas être négative'
     ],
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
 
     /*
     |--------------------------------------------------------------------------
@@ -129,6 +120,18 @@ return [
         'hashed_pass'      => 'Votre mot de passe actuel est incorrect',
         'dumbpwd'          => 'Ce mot de passe est trop commun.',
         'statuslabel_type' => 'Vous devez sélectionner un type d\'étiquette de statut valide',
+
+        // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
+        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // people won't know how to format. 
+        'purchase_date.date_format'     => 'The :attribute must be a valid date in YYYY-MM-DD format',
+        'last_audit_date.date_format'   =>  'The :attribute must be a valid date in YYYY-MM-DD hh:mm:ss format',
+        'expiration_date.date_format'   =>  'The :attribute must be a valid date in YYYY-MM-DD format',
+        'termination_date.date_format'  =>  'The :attribute must be a valid date in YYYY-MM-DD format',
+        'expected_checkin.date_format'  =>  'The :attribute must be a valid date in YYYY-MM-DD format',
+        'start_date.date_format'        =>  'The :attribute must be a valid date in YYYY-MM-DD format',
+        'end_date.date_format'          =>  'The :attribute must be a valid date in YYYY-MM-DD format',
+
     ],
 
     /*

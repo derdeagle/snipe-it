@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'acceptance_asset_accepted' => 'A user has accepted an item',
-    'acceptance_asset_declined' => 'A user has declined an item',
+    'acceptance_asset_accepted' => '用户已接受一件物品',
+    'acceptance_asset_declined' => '用户拒绝了一件物品',
     'a_user_canceled' => '用户已取消物品申请',
     'a_user_requested' => '用户已申请物品',
     'accessory_name' => '配件名称：',
@@ -43,6 +43,7 @@ return [
     'login_first_admin' => '请使用以下凭据登录新安装的 Snipe-IT：',
     'login' => '登录：',
     'Low_Inventory_Report' => '低库存报告',
+    'inventory_report' => 'Inventory Report',
     'min_QTY' => '最小数量',
     'name' => '名字',
     'new_item_checked' => '一项新物品已分配至您的名下，详细信息如下。',
@@ -78,4 +79,5 @@ return [
     'Expected_Checkin_Notification' => '提醒：:name 签入截止日期已接近。',
     'Expected_Checkin_Date' => '借出的资产将在 :date 重新签入',
     'your_assets' => '查看您的资产',
+    'rights_reserved' => 'All rights reserved.',
 ];

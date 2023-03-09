@@ -45,15 +45,19 @@
 
 <!-- Image -->
 @if (($item->image) && ($item->image!=''))
-    <div class="form-group {{ $errors->has('image_delete') ? 'has-error' : '' }}">
-        <label class="col-md-3 control-label" for="image_delete">{{ trans('general.image_delete') }}</label>
-        <div class="col-md-9">
+    <div class="form-group{{ $errors->has('image_delete') ? ' has-error' : '' }}">
+        <div class="col-md-9 col-md-offset-3">
             <label for="image_delete">
-                {{ Form::checkbox('image_delete', '1', old('image_delete'), array('class' => 'minimal', 'aria-label'=>'required')) }}
+                {{ Form::checkbox('image_delete', '1', old('image_delete'), ['class'=>'minimal','aria-label'=>'image_delete']) }}
+                {{ trans('general.image_delete') }}
+                {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
             </label>
-            <br>
-            <img src="{{ url('/') }}/uploads/locations/{{ $item->image }}" alt="Image for {{ $item->name }}">
-            {!! $errors->first('image_delete', '<span class="alert-msg" aria-hidden="true"><br>:message</span>') !!}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-9 col-md-offset-3">
+            <img src="{{ Storage::disk('public')->url(app('locations_upload_path').e($item->image)) }}" class="img-responsive">
+            {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
         </div>
     </div>
 @endif
@@ -61,50 +65,3 @@
 @include ('partials.forms.edit.image-upload')
 @stop
 
-@if (!$item->id)
-@section('moar_scripts')
-<script nonce="{{ csrf_token() }}">
-
-    var $eventSelect = $(".parent");
-    $eventSelect.on("change", function () { parent_details($eventSelect.val()); });
-    $(function() {
-        var parent_loc = $(".parent option:selected").val();
-        if(parent_loc!=''){
-            parent_details(parent_loc);
-        }
-    });
-
-    function parent_details(id) {
-
-        if (id) {
-//start ajax request
-$.ajax({
-    type: 'GET',
-    url: "{{url('/') }}/api/locations/"+id+"/check",
-//force to handle it as text
-dataType: "text",
-success: function(data) {
-    var json = $.parseJSON(data);
-    $("#city").val(json.city);
-    $("#address").val(json.address);
-    $("#address2").val(json.address2);
-    $("#state").val(json.state);
-    $("#zip").val(json.zip);
-    $(".country").select2("val",json.country);
-}
-});
-} else {
-    $("#city").val('');
-    $("#address").val('');
-    $("#address2").val('');
-    $("#state").val('');
-    $("#zip").val('');
-    $(".country").select2("val",'');
-}
-
-
-
-};
-</script>
-@stop
-@endif

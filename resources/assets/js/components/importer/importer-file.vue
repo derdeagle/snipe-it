@@ -161,6 +161,7 @@
                         {id: 'warranty_months', text: 'Warranty Months' },
                         {id: 'last_audit_date', text: 'Last Audit Date' },
                         {id: 'next_audit_date', text: 'Audit Date' },
+                        {id: 'byod', text: 'BYOD' },
                     ],
                     consumables: [
                         {id: 'item_no', text: "Item Number"},
@@ -194,6 +195,8 @@
                         {id: 'state', text: 'State' },
                         {id: 'country', text: 'Country' },
                         {id: 'zip', text: 'ZIP' },
+                        {id: 'remote', text: 'Remote'},
+                        {id: 'vip', text: 'VIP'},
 
                     ],
                     customFields: this.customFields,

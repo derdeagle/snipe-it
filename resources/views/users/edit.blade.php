@@ -272,14 +272,22 @@
                           </div>
                       </div> <!--/form-group-->
                   @endif
+
                   <!-- Image -->
-                  @if ($user->avatar)
-                      <div class="form-group {{ $errors->has('image_delete') ? 'has-error' : '' }}">
-                          <label class="col-md-3 control-label" for="image_delete">{{ trans('general.image_delete') }}</label>
-                          <div class="col-md-5">
-                              {{ Form::checkbox('image_delete') }}
-                              <img src="{{ Storage::disk('public')->url(app('users_upload_path').e($user->avatar)) }}" class="img-responsive" />
-                              {!! $errors->first('image_delete', '<span class="alert-msg"><br>:message</span>') !!}
+                  @if (($user->avatar) && ($user->avatar!=''))
+                      <div class="form-group{{ $errors->has('image_delete') ? ' has-error' : '' }}">
+                          <div class="col-md-9 col-md-offset-3">
+                              <label for="image_delete">
+                                  {{ Form::checkbox('image_delete', '1', old('image_delete'), ['class'=>'minimal','aria-label'=>'image_delete']) }}
+                                  {{ trans('general.image_delete') }}
+                                  {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
+                              </label>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="col-md-9 col-md-offset-3">
+                              <img src="{{ Storage::disk('public')->url(app('users_upload_path').$user->avatar) }}" class="img-responsive">
+                              {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
                           </div>
                       </div>
                   @endif
@@ -358,6 +366,23 @@
                           <!--  Department -->
                           @include ('partials.forms.edit.department-select', ['translated_name' => trans('general.department'), 'fieldname' => 'department_id'])
 
+                          @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.start_date'), 'fieldname' => 'start_date', 'item' => $user])
+
+                          @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.end_date'), 'fieldname' => 'end_date', 'item' => $user])
+
+                          <!-- VIP checkbox -->
+                          <div class="form-group">
+                              <div class="col-md-7 col-md-offset-3">
+                                  <label for="vip">
+                                      <input type="checkbox" value="1" name="vip" class="minimal" {{ (old('vip', $user->vip)) == '1' ? ' checked="checked"' : '' }} aria-label="vip">
+                                      {{ trans('admin/users/general.vip_label') }}
+
+                                  </label>
+                                  <p class="help-block">{{ trans('admin/users/general.vip_help') }}
+                                  </p>
+                              </div>
+                          </div>
+
 
                           <!-- remote checkbox -->
                           <div class="form-group">
@@ -368,6 +393,19 @@
 
                                   </label>
                                   <p class="help-block">{{ trans('admin/users/general.remote_help') }}
+                                  </p>
+                              </div>
+                          </div>
+
+                          <!-- Auto Assign checkbox -->
+                          <div class="form-group">
+                              <div class="col-md-7 col-md-offset-3">
+                                  <label for="autoassign_licenses">
+                                      <input type="checkbox" value="1" name="autoassign_licenses" class="minimal" {{ (old('autoassign_licenses', $user->autoassign_licenses)) == '1' ? ' checked="checked"' : '' }} aria-label="autoassign_licenses">
+                                      {{ trans('admin/users/general.auto_assign_label') }}
+
+                                  </label>
+                                  <p class="help-block">{{ trans('admin/users/general.auto_assign_help') }}
                                   </p>
                               </div>
                           </div>
@@ -499,7 +537,7 @@
                                               </ul>
                                           @endif
 
-                                          <span class="help-block">{{ trans('admin/users/general.group_memberships_helpblock') }}</p>
+                                          <span class="help-block">{{ trans('admin/users/general.group_memberships_helpblock') }}</span>
                                   @else
                                    <div class="controls">
                                     <select
@@ -564,7 +602,7 @@
           </div><!-- /.tab-pane -->
         </div><!-- /.tab-content -->
         <div class="box-footer text-right">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.save') }}</button>
+          <button type="submit" accesskey="s" class="btn btn-primary"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.save') }}</button>
         </div>
       </div><!-- nav-tabs-custom -->
     </form>

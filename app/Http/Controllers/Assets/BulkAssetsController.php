@@ -33,7 +33,6 @@ class BulkAssetsController extends Controller
 
         if (! $request->filled('ids')) {
             return redirect()->back()->with('error', trans('admin/hardware/message.update.no_assets_selected'));
-
         }
 
         // Figure out where we need to send the user after the update is complete, and store that in the session
@@ -289,7 +288,8 @@ class BulkAssetsController extends Controller
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkout', $asset);
-                    $error = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), null);
+
+                    $error = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
 
                     if ($target->location_id != '') {
                         $asset->location_id = $target->location_id;

@@ -100,6 +100,8 @@ class AssetsController extends Controller
             'checkout_counter',
             'checkin_counter',
             'requests_counter',
+            'byod',
+            'asset_eol_date',
         ];
 
         $filter = [];
@@ -120,14 +122,12 @@ class AssetsController extends Controller
 
         if ($filter_non_deprecable_assets) {
             $non_deprecable_models = AssetModel::select('id')->whereNotNull('depreciation_id')->get();
-
             $assets->InModelList($non_deprecable_models->toArray());
         }
 
         // These are used by the API to query against specific ID numbers.
         // They are also used by the individual searches on detail pages like
         // locations, etc.
-
 
         // Search custom fields by column name
         foreach ($all_custom_fields as $field) {
@@ -136,9 +136,16 @@ class AssetsController extends Controller
             }
         }
 
-
         if ($request->filled('status_id')) {
             $assets->where('assets.status_id', '=', $request->input('status_id'));
+        }
+
+        if ($request->filled('asset_tag')) {
+            $assets->where('assets.asset_tag', '=', $request->input('asset_tag'));
+        }
+
+        if ($request->filled('serial')) {
+            $assets->where('assets.serial', '=', $request->input('serial'));
         }
 
         if ($request->input('requestable') == 'true') {
@@ -165,6 +172,10 @@ class AssetsController extends Controller
             $assets->where('assets.supplier_id', '=', $request->input('supplier_id'));
         }
 
+        if ($request->filled('asset_eol_date')) {
+            $assets->where('assets.asset_eol_date', '=', $request->input('asset_eol_date'));
+        }
+
         if (($request->filled('assigned_to')) && ($request->filled('assigned_type'))) {
             $assets->where('assets.assigned_to', '=', $request->input('assigned_to'))
                 ->where('assets.assigned_type', '=', $request->input('assigned_type'));
@@ -180,6 +191,10 @@ class AssetsController extends Controller
 
         if ($request->filled('depreciation_id')) {
             $assets->ByDepreciationId($request->input('depreciation_id'));
+        }
+
+        if ($request->filled('byod')) {
+            $assets->where('assets.byod', '=', $request->input('byod'));
         }
 
         $request->filled('order_number') ? $assets = $assets->where('assets.order_number', '=', e($request->get('order_number'))) : '';
@@ -258,6 +273,11 @@ class AssetsController extends Controller
             case 'Deployed':
                 // more sad, horrible workarounds for laravel bugs when doing full text searches
                 $assets->where('assets.assigned_to', '>', '0');
+                break;
+            case 'byod':
+                // This is kind of redundant, since we already check for byod=1 above, but this keeps the
+                // sidebar nav links a little less chaotic
+                $assets->where('assets.byod', '=', '1');
                 break;
             default:
 
@@ -357,19 +377,38 @@ class AssetsController extends Controller
     /**
      * Returns JSON with information about an asset (by tag) for detail view.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param string $tag
      * @since [v4.2.1]
-     * @return JsonResponse
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @return \Illuminate\Http\JsonResponse
      */
     public function showByTag(Request $request, $tag)
     {
-        if ($asset = Asset::with('assetstatus')->with('assignedTo')->where('asset_tag', $tag)->first()) {
-            $this->authorize('view', $asset);
+        $this->authorize('index', Asset::class);
+        $assets = Asset::where('asset_tag', $tag)->with('assetstatus')->with('assignedTo');
 
-            return (new AssetsTransformer)->transformAsset($asset, $request);
+        // Check if they've passed ?deleted=true
+        if ($request->input('deleted', 'false') == 'true') {
+            $assets = $assets->withTrashed();
         }
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'Asset not found'), 200);
+
+        if (($assets = $assets->get()) && ($assets->count()) > 0) {
+
+            // If there is exactly one result and the deleted parameter is not passed, we should pull the first (and only)
+            // asset from the returned collection, since transformAsset() expects an Asset object, NOT a collection
+            if (($assets->count() == 1) && ($request->input('deleted') != 'true')) {
+                return (new AssetsTransformer)->transformAsset($assets->first());
+
+                // If there is more than one result OR if the endpoint is requesting deleted items (even if there is only one
+                // match, return the normal collection transformed.
+            } else {
+                return (new AssetsTransformer)->transformAssets($assets, $assets->count());
+            }
+
+        }
+
+        // If there are 0 results, return the "no such asset" response
+        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')), 200);
 
     }
 
@@ -379,29 +418,25 @@ class AssetsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param string $serial
      * @since [v4.2.1]
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function showBySerial(Request $request, $serial)
     {
         $this->authorize('index', Asset::class);
-        if ($assets = Asset::with('assetstatus')->with('assignedTo')
-            ->withTrashed()->where('serial', $serial)->get()) {
-                return (new AssetsTransformer)->transformAssets($assets, $assets->count());
-        }
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'Asset not found'), 200);
+        $assets = Asset::where('serial', $serial)->with('assetstatus')->with('assignedTo');
 
-        $assets = Asset::with('assetstatus')->with('assignedTo');
-
-        if ($request->input('deleted', 'false') === 'true') {
+        // Check if they've passed ?deleted=true
+        if ($request->input('deleted', 'false') == 'true') {
             $assets = $assets->withTrashed();
-    }
-
-        $assets = $assets->where('serial', $serial)->get();
-        if ($assets) {
-            return (new AssetsTransformer)->transformAssets($assets, $assets->count());
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Asset not found'), 200);
         }
+        
+        if (($assets = $assets->get()) && ($assets->count()) > 0) {
+             return (new AssetsTransformer)->transformAssets($assets, $assets->count());
+        }
+
+        // If there are 0 results, return the "no such asset" response
+        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')), 200);
+
     }
 
     /**
@@ -825,7 +860,8 @@ class AssetsController extends Controller
         $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
         $expected_checkin = request('expected_checkin', null);
         $note = request('note', null);
-        $asset_name = request('name', null);
+        // Using `->has` preserves the asset name if the name parameter was not included in request.
+        $asset_name = request()->has('name') ? request('name') : $asset->name;
 
         // Set the location ID to the RTD location id if there is one
         // Wait, why are we doing this? This overrides the stuff we set further up, which makes no sense.

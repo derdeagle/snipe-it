@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'acceptance_asset_accepted' => 'A user has accepted an item',
-    'acceptance_asset_declined' => 'A user has declined an item',
+    'acceptance_asset_accepted' => 'ユーザーがアイテムを承認しました',
+    'acceptance_asset_declined' => 'ユーザーがアイテムを拒否しました',
     'a_user_canceled' => 'ユーザーがアイテムリクエストをキャンセルしました。',
     'a_user_requested' => 'ユーザーがアイテムをリクエストしています',
     'accessory_name' => '付属品名:',
@@ -43,6 +43,7 @@ return [
     'login_first_admin' => '以下の新しいログイン情報を使用して、Snipe-ITにログインします。',
     'login' => 'ログイン:',
     'Low_Inventory_Report' => '在庫減レポート',
+    'inventory_report' => 'Inventory Report',
     'min_QTY' => '分数',
     'name' => '名前',
     'new_item_checked' => 'あなたの名前で新しいアイテムがチェックアウトされました。詳細は以下の通りです。',
@@ -78,4 +79,5 @@ return [
     'Expected_Checkin_Notification' => 'リマインダー: :name のチェックイン期限が近づいています',
     'Expected_Checkin_Date' => 'チェックアウトされた資産は:date にチェックインされる予定です',
     'your_assets' => 'あなたの資産を表示',
+    'rights_reserved' => 'All rights reserved.',
 ];

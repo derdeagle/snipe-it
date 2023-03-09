@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'acceptance_asset_accepted' => 'A user has accepted an item',
-    'acceptance_asset_declined' => 'A user has declined an item',
+    'acceptance_asset_accepted' => 'Un utente ha accettato un elemento',
+    'acceptance_asset_declined' => 'Un utente ha rifiutato un elemento',
     'a_user_canceled' => 'Un utente ha annullato una richiesta di articolo sul sito web',
     'a_user_requested' => 'Un utente ha richiesto un elemento tramite il sito web',
     'accessory_name' => 'Nome accessorio:',
@@ -43,6 +43,7 @@ return [
     'login_first_admin' => 'Accedi alla nuova installazione di Snipe-IT utilizzando le seguenti credenziali:',
     'login' => 'Accesso:',
     'Low_Inventory_Report' => 'Rapporto di inventario basso',
+    'inventory_report' => 'Inventory Report',
     'min_QTY' => 'Min QTY',
     'name' => 'Nome',
     'new_item_checked' => 'Un nuovo elemento è stato controllato sotto il tuo nome, i dettagli sono sotto.',
@@ -78,4 +79,5 @@ return [
     'Expected_Checkin_Notification' => 'Promemoria: scadenza riconsegna :name in avvicinamento',
     'Expected_Checkin_Date' => 'Un asset assegnato a te deve essere ricontrollato il :date',
     'your_assets' => 'Visualizza i tuoi assets',
+    'rights_reserved' => 'All rights reserved.',
 ];

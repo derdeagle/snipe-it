@@ -14,7 +14,8 @@ return array(
     'ldap_not_configured'        => 'LDAPの統合は、インストール時に設定されません。',
     'password_resets_sent'      => '有効なメールアドレスを持っている選択されたユーザーにパスワードリセットのリンクが送信されました。',
     'password_reset_sent'       => 'パスワードリセットのURLが:emailに送信されました。',
-    'user_has_no_email'         => 'This user does not have an email address in their profile.',
+    'user_has_no_email'         => 'このユーザーのプロフィールにはメールアドレスがありません。',
+    'user_has_no_assets_assigned'   => 'このユーザーにはアセットが割り当てられていません',
 
 
     'success' => array(
@@ -59,4 +60,8 @@ return array(
         'invalidfiles' => 'いずれかのファイルが大き過ぎるか、ファイルタイプが許可されていません。許可されているファイルタイプ（png, gif, jpg, doc, docx, pdf, and txt）',
     ),
 
+    'inventorynotification' => array(
+        'error'   => 'このユーザーにはメールアドレスが設定されていません。',
+        'success' => 'ユーザーに現在の在庫について通知されました。'
+    )
 );
